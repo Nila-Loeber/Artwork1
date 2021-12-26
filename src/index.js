@@ -1,14 +1,16 @@
 import "./styles.css";
 import { SVG, Color } from "@svgdotjs/svg.js";
+import "chance";
 
 function getRandomInt(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+  //return Math.floor(Math.random() * (max - min + 1)) + min;
+  return chance.integer({ min: min, max: max });
 }
 
 let fillFunctions = [
-  //drawBlackRect,
+  drawBlackRect,
   drawRect,
   drawTriangle,
   drawCircle,
@@ -22,7 +24,8 @@ const MATRIX_SIZE_EXPONENT = 2;
 function fillRect(surface, fillfunctions, recursionDepth) {
   let matrixSize;
   do {
-    matrixSize = 2 ** getRandomInt(0, MATRIX_SIZE_EXPONENT);
+    matrixSize = 2 ** chance.weighted([0, 1, 2], [8, 10, 6]);
+    //matrixSize = 2 ** getRandomInt(0, MATRIX_SIZE_EXPONENT);
     // we don't want a 1x1 Matrix as the only result
   } while (recursionDepth === 0 && matrixSize === 1);
   //let matrixSize = getRandomInt(2, 8);
@@ -35,7 +38,8 @@ function fillRect(surface, fillfunctions, recursionDepth) {
       : Color.random("grey");
 
   if (matrixSize === 1 || recursionDepth >= MAX_RECURSIONDEPTH) {
-    let fillFunction = getRandomInt(0, fillfunctions.length - 1);
+    //let fillFunction = getRandomInt(0, fillfunctions.length - 1);
+    let fillFunction = chance.weighted([0, 1, 2, 3, 4], [20, 1, 40, 10, 20]);
     fillfunctions[fillFunction](surface, color);
   } else {
     for (let x = 0; x < matrixSize; x++) {
@@ -69,7 +73,7 @@ function drawRect(surface, color) {
 }
 
 function drawBlackRect(surface, color) {
-  surface.rect(1000, 1000).move(0, 0).attr({ fill: "#000" });
+  surface.rect(1000, 1000).move(0, 0).attr({ fill: "#000", opacity: 0.5 });
   //.attr({ fill: Color.random("grey") });
 }
 
@@ -135,12 +139,13 @@ fillRect(muster, fillFunctions, 0);
 //   .move(0, 0)
 //   .flip("both", { x: 1000, y: 1000 });
 
-let stepwidth = 90;
-let moveAmount = getRandomInt(0, 100);
+let stepwidth = 90 / getRandomInt(1, 2);
+let moveAmount = getRandomInt(0, 20);
 for (let i = 0; i < 360; i = i + stepwidth) {
   draw
     .use(muster)
     .move(moveAmount, moveAmount)
     .scale(0.5, 0.5, 1000, 1000)
+    .animate(3000, 1000, "now")
     .rotate(i, 0, 0);
 }
