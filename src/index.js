@@ -18,28 +18,30 @@ let fillFunctions = [
 ];
 
 const MAX_RECURSIONDEPTH = 2;
-const BW_CHANCE = 80;
+const BW_CHANCE = 70;
 const MATRIX_SIZE_EXPONENT = 2;
 
 function fillRect(surface, fillfunctions, recursionDepth) {
   let matrixSize;
   do {
-    matrixSize = 2 ** chance.weighted([0, 1, 2], [8, 10, 6]);
+    matrixSize = 2 ** chance.weighted([0, 1, 2], [4, 12, 7]);
     //matrixSize = 2 ** getRandomInt(0, MATRIX_SIZE_EXPONENT);
     // we don't want a 1x1 Matrix as the only result
-  } while (recursionDepth === 0 && matrixSize === 1);
+  } while (recursionDepth === 0 && matrixSize < 3);
   //let matrixSize = getRandomInt(2, 8);
   //let matrixSize = 2;
   let blockSize = viewboxSize / matrixSize;
 
-  let color =
-    getRandomInt(0, 100) > BW_CHANCE
-      ? Color.random("vibrant")
-      : Color.random("grey");
+  let color = Color.random(
+    chance.weighted(["grey", "pastel", "vibrant"], [50, 25, 25])
+  );
+  //getRandomInt(0, 100) > BW_CHANCE
+  //  ? Color.random("vibrant")
+  //  : Color.random("pastel");
 
   if (matrixSize === 1 || recursionDepth >= MAX_RECURSIONDEPTH) {
     //let fillFunction = getRandomInt(0, fillfunctions.length - 1);
-    let fillFunction = chance.weighted([0, 1, 2, 3, 4], [20, 1, 40, 10, 20]);
+    let fillFunction = chance.weighted([1, 2, 3, 4], [1, 40, 10, 10]);
     fillfunctions[fillFunction](surface, color);
   } else {
     for (let x = 0; x < matrixSize; x++) {
@@ -80,7 +82,10 @@ function drawBlackRect(surface, color) {
 function drawCircle(surface, color) {
   let gradient = makeGradient(surface, color);
 
-  surface.circle(1000).move(0, 0).attr({ fill: gradient });
+  surface
+    .circle(1000)
+    .move(getRandomInt(-1, 1) * 500, getRandomInt(-1, 1) * 500)
+    .attr({ fill: gradient });
 }
 
 function drawTriangle(surface, color) {
@@ -105,10 +110,11 @@ function drawLine(surface, color) {
   surface
     //.line(0, 0, getRandomInt(0, 1000), getRandomInt(0, 1000))
     .line(0, 0, 1000, 1000)
+    .rotate(getRandomInt(0, 3) * 45)
     .attr({
       stroke: gradient,
       "stroke-width": 200,
-      "stroke-dasharray": "20 20"
+      "stroke-dasharray": "20 " + getRandomInt(10, 40)
     });
 }
 
@@ -141,11 +147,23 @@ fillRect(muster, fillFunctions, 0);
 
 let stepwidth = 90 / getRandomInt(1, 2);
 let moveAmount = getRandomInt(0, 20);
-for (let i = 0; i < 360; i = i + stepwidth) {
-  draw
-    .use(muster)
-    .move(moveAmount, moveAmount)
-    .scale(0.5, 0.5, 1000, 1000)
-    .animate(3000, 1000, "now")
-    .rotate(i, 0, 0);
+for (let i = 0; i < 360; i = i + 1) {
+  let opacityAttr;
+  if (i % stepwidth === 0) {
+    opacityAttr = 1;
+  } else {
+    opacityAttr = (i * (1 / 360)) / 32;
+    //opacityAttr = 0.03;
+  }
+  if (i % 36 === 0 || i % stepwidth === 0) {
+    draw
+      .use(muster)
+      .move(moveAmount, moveAmount)
+      //.attr({ opacity: 0.2 + i * (1 / 360) })
+      //.attr({ opacity: i * (1 / 360) })
+      .attr("opacity", opacityAttr)
+      .scale(0.5, 0.5, 1000, 1000)
+      .animate(3000, 1000, "now")
+      .rotate(i, 0, 0);
+  }
 }
