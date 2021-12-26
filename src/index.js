@@ -24,7 +24,7 @@ const MATRIX_SIZE_EXPONENT = 2;
 function fillRect(surface, fillfunctions, recursionDepth) {
   let matrixSize;
   do {
-    matrixSize = 2 ** chance.weighted([0, 1, 2], [4, 12, 7]);
+    matrixSize = 2 ** chance.weighted([0, 1, 2, 3], [4, 12, 3, 1]);
     //matrixSize = 2 ** getRandomInt(0, MATRIX_SIZE_EXPONENT);
     // we don't want a 1x1 Matrix as the only result
   } while (recursionDepth === 0 && matrixSize < 3);
@@ -120,40 +120,43 @@ function drawLine(surface, color) {
 
 const viewboxSize = 1000;
 
+let getBgColor = chance.weighted(
+  [
+    function () {
+      return "black";
+    },
+    function () {
+      return "white";
+    },
+    function () {
+      return Color.random("pastel");
+    },
+    function () {
+      return Color.random("vibrant");
+    }
+  ],
+  [40, 40, 10, 10]
+);
+
+let bgColor = getBgColor();
+
+document.getElementsByTagName("body")[0].style.backgroundColor = bgColor;
+
 let draw = SVG().addTo("body").size("100%", "100%").viewbox(0, 0, 1000, 1000);
 
 let muster = draw.defs().group();
 
 fillRect(muster, fillFunctions, 0);
 
-// draw.use(muster);
-// draw.use(muster).flip({ x: 250, y: 250 });
-// draw.use(muster).scale(0.5, 0.5, 0, 0);
-// draw
-//   .use(muster)
-//   .scale(0.5, 0.5, 0, 0)
-//   .move(1000, 1000)
-//   .flip("x", { x: 1000, y: 1000 });
-// draw
-//   .use(muster)
-//   .scale(0.5, 0.5, 0, 0)
-//   .move(1000, 1000)
-//   .flip("y", { x: 1000, y: 1000 });
-// draw
-//   .use(muster)
-//   .scale(0.5, 0.5, 0, 0)
-//   .move(0, 0)
-//   .flip("both", { x: 1000, y: 1000 });
-
 let stepwidth = 90 / getRandomInt(1, 2);
-let moveAmount = getRandomInt(0, 20);
+let moveAmount = getRandomInt(-100, 100);
 for (let i = 0; i < 360; i = i + 1) {
   let opacityAttr;
   if (i % stepwidth === 0) {
     opacityAttr = 1;
   } else {
-    opacityAttr = (i * (1 / 360)) / 32;
-    //opacityAttr = 0.03;
+    //opacityAttr = (i * (1 / 360)) / 16;
+    opacityAttr = 0.04;
   }
   if (i % 36 === 0 || i % stepwidth === 0) {
     draw
@@ -163,7 +166,7 @@ for (let i = 0; i < 360; i = i + 1) {
       //.attr({ opacity: i * (1 / 360) })
       .attr("opacity", opacityAttr)
       .scale(0.5, 0.5, 1000, 1000)
-      .animate(3000, 1000, "now")
+      .animate(7000, 2000, "now")
       .rotate(i, 0, 0);
   }
 }
